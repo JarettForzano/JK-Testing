@@ -1,13 +1,17 @@
 # JK Testing
 
+### Requirements
+- Node
+
 ### Install instructions
 
 1. Clone repository: `git@github.com:JarettForzano/JK-Testing.git`
-2. Find the `src/extension.ts`
-3. Click `Run and Debug` - Wait for new window to open up
-4. Command + Shift + P
+2. Install dependencies `npm install`
+3. Find the `src/extension.ts`
+4. Click `Run and Debug` - Wait for new window to open up
+5. Command + Shift + P
    -  Search "Hello world"
-5. Run it
+6. Run it
 
 ### Documentation
 * [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
