@@ -7,7 +7,7 @@
 
 1. Clone repository: `git@github.com:JarettForzano/JK-Testing.git`
 2. Install dependencies `npm install`
-3. Find the `src/extension.ts`
+3. Compile the extension `tsc` -> will appear inside of `out`
 4. Click `Run and Debug` - Wait for new window to open up
 5. Command + Shift + P
    -  Search "Hello world"
