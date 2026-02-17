@@ -1,7 +1,7 @@
 {
-  "name": "jk-test",
-  "displayName": "JK Test",
-  "description": "Test your code with generated unit tests and offer suggestions to improve your code.",
+  "name": "code-tutor",
+  "displayName": "code-tutor",
+  "description": "",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.109.0"
@@ -11,14 +11,18 @@
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "jk-test.helloWorld",
-        "title": "Hello World"
-      }
+  "contributes":{
+    "chatParticipants": [
+    {
+        "id": "chat-tutorial.code-tutor",
+        "fullName": "Code Tutor",
+        "name": "tutor",
+        "description": "What can I teach you?",
+        "isSticky": true
+    }
     ]
-  },
+}
+,
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
