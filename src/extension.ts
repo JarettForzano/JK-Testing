@@ -22,7 +22,21 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
+
+	// Register the "Test with JK-Testing" context menu command
+	const jkTestingCommand = vscode.commands.registerCommand('code-tutor.testWithJK', () => {
+		const editor = vscode.window.activeTextEditor;
+		if (editor) {
+			const selection = editor.selection;
+			const selectedText = editor.document.getText(selection);
+			// TODO: wire selectedText into your LLM/testing logic
+			vscode.window.showInformationMessage('JK-Testing triggered!');
+		}
+	});
+
+	context.subscriptions.push(jkTestingCommand);
 }
+
 // define a chat handler
 const base_handler: vscode.ChatRequestHandler = async (
   request: vscode.ChatRequest,
