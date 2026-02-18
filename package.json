@@ -11,30 +11,8 @@
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
-  "contributes": {
+  "contributes":{
     "chatParticipants": [
-      {
-        "id": "chat-tutorial.code-tutor",
-        "fullName": "Code Tutor",
-        "name": "tutor",
-        "description": "What can I teach you?",
-        "isSticky": true
-      }
-    ],
-    "commands": [
-      {
-        "command": "code-tutor.testWithJK",
-        "title": "Test with JK-Testing"
-      }
-    ],
-    "menus": {
-      "editor/context": [
-        {
-          "command": "code-tutor.testWithJK",
-          "group": "navigation",
-          "when": "editorHasSelection"
-        }
-      ]
     {
         "id": "jk-test.jk-agent",
         "fullName": "JK Test QA Agent",
@@ -52,7 +30,9 @@
           }
         ]
     }
-  },
+    ]
+}
+,
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -62,13 +42,13 @@
     "test": "vscode-test"
   },
   "devDependencies": {
+    "@types/vscode": "^1.109.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "@types/vscode": "^1.109.0",
-    "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2",
-    "eslint": "^4.1.1",
+    "typescript-eslint": "^8.54.0",
+    "eslint": "^9.39.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.14.0"
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
   }
 }
