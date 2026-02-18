@@ -1,6 +1,6 @@
 {
-  "name": "code-tutor",
-  "displayName": "code-tutor",
+  "name": "jk-test",
+  "displayName": "jk-test",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -35,6 +35,22 @@
           "when": "editorHasSelection"
         }
       ]
+    {
+        "id": "jk-test.jk-agent",
+        "fullName": "JK Test QA Agent",
+        "name": "JKAgent",
+        "description": "Let's check your code.",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "vulnerabilities",
+            "description": "Analyze the code for vulnerabilities."
+          },
+          {
+            "name": "oversights",
+            "description": "Analyze the code for oversights or edge cases."
+          }
+        ]
     }
   },
   "scripts": {
