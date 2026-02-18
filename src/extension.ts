@@ -28,10 +28,20 @@ const base_handler: vscode.ChatRequestHandler = async (
   }
 
   // TODO add previous message context according to tutorial
-
+  
   // initialize the messages array with the prompt
   const messages = [vscode.LanguageModelChatMessage.User(prompt)];
-
+   const previousMessages = context.history.filter(
+    h => h instanceof vscode.ChatResponseTurn
+  );
+   previousMessages.forEach(m => {
+    let fullMessage = '';
+    m.response.forEach(r => {
+      const mdPart = r as vscode.ChatResponseMarkdownPart;
+      fullMessage += mdPart.value.value;
+    });
+    messages.push(vscode.LanguageModelChatMessage.Assistant(fullMessage));
+  });
   // add in the user's message
   messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
 
@@ -48,8 +58,7 @@ const base_handler: vscode.ChatRequestHandler = async (
 
 // create participant
 const base = vscode.chat.createChatParticipant('jk-test.jk-agent', base_handler);
-
-// TODO add an icon
+base.iconPath = vscode.Uri.file('./Screenshot 2026-02-18 143951');
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
