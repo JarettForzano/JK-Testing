@@ -16,6 +16,10 @@ suite('Chat Tests', () => {
 	test('responds with a message', async () => {
 		const messages: string[] = [];
 
+		const mockContext = {
+			history: ["Message a1", "Message 2"] as any
+		};
+
 		const mockRequest = {
 			prompt: 'Can you take a look at my code?',
 			command: undefined,
@@ -34,7 +38,7 @@ suite('Chat Tests', () => {
 
 		await base_handler(
 			mockRequest,
-			{} as any,
+			mockContext,
 			mockStream,
 			mockToken
 		);
