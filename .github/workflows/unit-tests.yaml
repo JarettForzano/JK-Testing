@@ -1,0 +1,21 @@
+name: Vscode tests
+on: [push, pull]
+
+jobs:
+  vscode-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - name: Use project node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: '23.5.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
