@@ -11,7 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "jk-test" is now active!');
 }
 // define a chat handler
-const base_handler: vscode.ChatRequestHandler = async (
+export const base_handler: vscode.ChatRequestHandler = async (
   request: vscode.ChatRequest,
   context: vscode.ChatContext,
   stream: vscode.ChatResponseStream,
