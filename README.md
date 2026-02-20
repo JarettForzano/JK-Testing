@@ -14,6 +14,10 @@
 5. Open copilot
    1. Type `@tutor` in the chat
 
+### Testing
+
+Run `npm test`
+
 ### Documentation
 * [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
 * [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
