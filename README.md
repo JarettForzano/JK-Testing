@@ -18,6 +18,10 @@
 
 Run `npm test`
 
+### Linting
+
+Run `npm lint`
+
 ### Documentation
 * [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
 * [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
