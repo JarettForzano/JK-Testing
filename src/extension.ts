@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 // define a chat handler
-const base_handler: vscode.ChatRequestHandler = async (
+export const base_handler: vscode.ChatRequestHandler = async (
   request: vscode.ChatRequest,
   context: vscode.ChatContext,
   stream: vscode.ChatResponseStream,

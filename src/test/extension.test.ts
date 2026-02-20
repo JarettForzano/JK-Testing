@@ -1,15 +1,49 @@
 import * as assert from 'assert';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-// import * as myExtension from '../../extension';
+import { base_handler } from '../extension.js';
 
-suite('Extension Test Suite', () => {
+suite('Default Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
-	test('Sample test', () => {
+	test('Base test', () => {
 		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
 		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
 	});
+});
+
+suite('Chat Tests', () => {
+
+	test('responds with a message', async () => {
+		const messages: string[] = [];
+
+		const mockContext = {
+			history: ["Message a1", "Message 2"] as any
+		};
+
+		const mockRequest = {
+			prompt: 'Can you take a look at my code?',
+			command: undefined,
+			model: {
+				sendRequest: async () => ({
+					text: (async function* () { yield 'Response'; })()
+				})
+			}
+		} as any;
+
+		const mockStream = {
+			markdown: (text: string) => messages.push(text)
+		} as any;
+
+		const mockToken = new vscode.CancellationTokenSource().token;
+
+		await base_handler(
+			mockRequest,
+			mockContext,
+			mockStream,
+			mockToken
+		);
+
+		assert.ok(messages.length > 0, 'Messages exist inside of the history');
+	});
+
 });
