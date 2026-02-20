@@ -1,5 +1,5 @@
 name: Vscode tests
-on: [push, pull]
+on: [push, pull_request]
 
 jobs:
   vscode-tests:
