@@ -10,7 +10,9 @@ export function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "jk-test" is now active!');
   const base = vscode.chat.createChatParticipant('jk-test.jk-agent', base_handler);
-  base.iconPath = vscode.Uri.file('../media/icon.png');
+ base.iconPath = vscode.Uri.file(
+    context.asAbsolutePath('media/icon.png')
+  );
 }
 // define a chat handler
 const base_handler: vscode.ChatRequestHandler = async (
