@@ -9,6 +9,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "jk-test" is now active!');
+  const base = vscode.chat.createChatParticipant('jk-test.jk-agent', base_handler);
+ base.iconPath = vscode.Uri.file(
+    context.asAbsolutePath('media/icon.png')
+  );
 }
 // define a chat handler
 const base_handler: vscode.ChatRequestHandler = async (
@@ -52,13 +56,12 @@ const base_handler: vscode.ChatRequestHandler = async (
   for await (const fragment of chatResponse.text) {
     stream.markdown(fragment);
   }
+  
 
   return;
 };
 
 // create participant
-const base = vscode.chat.createChatParticipant('jk-test.jk-agent', base_handler);
-base.iconPath = vscode.Uri.file('./Screenshot 2026-02-18 143951');
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
