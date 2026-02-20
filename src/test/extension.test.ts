@@ -36,16 +36,12 @@ suite('Chat Tests', () => {
 
 		const mockToken = new vscode.CancellationTokenSource().token;
 
-		console.log(messages);
-
 		await base_handler(
 			mockRequest,
 			mockContext,
 			mockStream,
 			mockToken
 		);
-
-		console.log(messages);
 
 		assert.ok(messages.length > 0, 'Messages exist inside of the history');
 	});
