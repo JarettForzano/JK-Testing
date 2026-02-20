@@ -11,9 +11,9 @@
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
-  "contributes":{
+  "contributes": {
     "chatParticipants": [
-    {
+      {
         "id": "jk-test.jk-agent",
         "fullName": "JK Test QA Agent",
         "name": "JKAgent",
@@ -29,10 +29,24 @@
             "description": "Analyze the code for oversights or edge cases."
           }
         ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "jk-test.testWithJK",
+        "title": "Test with JK-Testing"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "jk-test.testWithJK",
+          "group": "navigation",
+          "when": "editorHasSelection"
+        }
+      ]
     }
-    ]
-}
-,
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",

@@ -9,11 +9,37 @@ export function activate(context: vscode.ExtensionContext) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "jk-test" is now active!');
-  const base = vscode.chat.createChatParticipant('jk-test.jk-agent', base_handler);
- base.iconPath = vscode.Uri.file(
-    context.asAbsolutePath('media/icon.png')
-  );
+
+	const base = vscode.chat.createChatParticipant('jk-test.jk-agent', base_handler);
+	base.iconPath = vscode.Uri.file(
+		context.asAbsolutePath('media/icon.png')
+	);
+
+	// Register the "Test with JK-Testing" context menu command
+	const jkTestingCommand = vscode.commands.registerCommand('jk-test.testWithJK', () => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			return;
+		}
+
+		const selection = editor.selection;
+		const selectedText = editor.document.getText(selection);
+
+		if (!selectedText) {
+			vscode.window.showWarningMessage('No text selected. Please select some code first.');
+			return;
+		}
+
+		// Open the chat panel and pre-fill it with the agent mention and selected code
+		vscode.commands.executeCommand('workbench.action.chat.open', {
+			query: `@JKAgent\n\`\`\`\n${selectedText}\n\`\`\``,
+			isPartialQuery: true  // keeps the query editable before sending, so user can add a command like /vulnerabilities
+		});
+	});
+
+	context.subscriptions.push(jkTestingCommand);
 }
+
 // define a chat handler
 const base_handler: vscode.ChatRequestHandler = async (
   request: vscode.ChatRequest,
@@ -56,12 +82,9 @@ const base_handler: vscode.ChatRequestHandler = async (
   for await (const fragment of chatResponse.text) {
     stream.markdown(fragment);
   }
-  
 
   return;
 };
-
-// create participant
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
