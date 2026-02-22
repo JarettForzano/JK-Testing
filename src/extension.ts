@@ -12,9 +12,14 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "jk-test" is now active!');
 
   trackCommits(context);
+  
+  const base = vscode.chat.createChatParticipant('jk-test.jk-agent', base_handler);
+  base.iconPath = vscode.Uri.file(
+    context.asAbsolutePath('media/icon.png')
+  );
 }
 // define a chat handler
-const base_handler: vscode.ChatRequestHandler = async (
+export const base_handler: vscode.ChatRequestHandler = async (
   request: vscode.ChatRequest,
   context: vscode.ChatContext,
   stream: vscode.ChatResponseStream,
@@ -41,10 +46,20 @@ const base_handler: vscode.ChatRequestHandler = async (
   }
 
   // TODO add previous message context according to tutorial
-
+  
   // initialize the messages array with the prompt
   const messages = [vscode.LanguageModelChatMessage.User(prompt)];
-
+   const previousMessages = context.history.filter(
+    h => h instanceof vscode.ChatResponseTurn
+  );
+   previousMessages.forEach(m => {
+    let fullMessage = '';
+    m.response.forEach(r => {
+      const mdPart = r as vscode.ChatResponseMarkdownPart;
+      fullMessage += mdPart.value.value;
+    });
+    messages.push(vscode.LanguageModelChatMessage.Assistant(fullMessage));
+  });
   // add in the user's message
   messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
 
@@ -55,14 +70,12 @@ const base_handler: vscode.ChatRequestHandler = async (
   for await (const fragment of chatResponse.text) {
     stream.markdown(fragment);
   }
+  
 
   return;
 };
 
 // create participant
-const base = vscode.chat.createChatParticipant('jk-test.jk-agent', base_handler);
-
-// TODO add an icon
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
