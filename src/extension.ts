@@ -1,7 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 import * as vscode from 'vscode';
 import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL } from './prompts';
-import { GitExtension } from './git';
 import { trackCommits } from './versionControl';
 
 // This method is called when your extension is activated
@@ -12,7 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "jk-test" is now active!');
 
-  trackCommits();
+  trackCommits(context);
 }
 // define a chat handler
 const base_handler: vscode.ChatRequestHandler = async (
