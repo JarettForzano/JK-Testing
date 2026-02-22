@@ -1,6 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 import * as vscode from 'vscode';
-import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT } from './prompts';
+import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL } from './prompts';
 import { GitExtension } from './git';
 import { trackCommits } from './versionControl';
 
@@ -22,13 +22,23 @@ const base_handler: vscode.ChatRequestHandler = async (
   token: vscode.CancellationToken
   
 ) => {
+
+  // selects the first model in the models copilot includes since "auto" throws an error. Can add more filters if desired.
+  const models = await vscode.lm.selectChatModels({
+        vendor: 'copilot'
+    });
+
+  const model = models[0];
+
   // initialize the prompt
   let prompt = BASE_PROMPT;
 
   if (request.command === 'vulnerabilities') {
-	prompt = prompt + "\n\n" + VULNERABILITIES_PROMPT; 
+	  prompt = VULNERABILITIES_PROMPT; 
   } else if (request.command === "oversights") {
-	prompt = prompt + "\n\n" + OVERSIGHTS_PROMPT;
+	  prompt = OVERSIGHTS_PROMPT;
+  } else if (request.command === "all") {
+    prompt = ALL;
   }
 
   // TODO add previous message context according to tutorial
@@ -40,7 +50,7 @@ const base_handler: vscode.ChatRequestHandler = async (
   messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
 
   // send the request
-  const chatResponse = await request.model.sendRequest(messages, {}, token);
+  const chatResponse = await model.sendRequest(messages, {}, token);
 
   // stream the response
   for await (const fragment of chatResponse.text) {
