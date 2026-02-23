@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - main
+      - auto-publish
   release:
     types:
     - created
