@@ -38,7 +38,9 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "deploy": "vsce publish --yarn"
+
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -46,8 +48,12 @@
     "@types/vscode": "^1.109.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.7.1",
+    "add": "^2.0.6",
     "eslint": "^9.39.2",
+    "or": "^0.2.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0"
+    "typescript-eslint": "^8.54.0",
+    "yarn": "^1.22.22"
   }
 }
