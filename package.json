@@ -59,9 +59,8 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0",
     "yarn": "^1.22.22"
-  }
-    "typescript-eslint": "^8.54.0"
   },
+  
   "extensionDependencies": [
 	  "vscode.git"
   ]
