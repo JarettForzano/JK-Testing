@@ -15,7 +15,7 @@ export function trackCommits(context: vscode.ExtensionContext) {
     context.globalState.update("NEVER", false);
 
     // Failure to get the git api
-    if (!git) return;
+    if (!git) {return;}
 
     // setup listening for a new repository that is opened by VSCode
     const setupRepo = (repo: Repository) => {
@@ -52,15 +52,15 @@ export function trackCommits(context: vscode.ExtensionContext) {
 
                     vscode.commands.executeCommand("workbench.action.chat.open", "@JKAgent /all " + "Perform your tasks on the following fies that were updated:\n" + changes);  
                 }
-            }
+            };
 
             // New commit was added
             if (currentHead?.commit !== prevHead?.commit && currentHead?.name === prevHead?.name) {
                 // Run full check if "Always" was already selected
-                if (context.globalState.get("ALWAYS") == true) {
+                if (context.globalState.get("ALWAYS") === true) {
                     checkAll();
                     // Show options as long as "Never" wasn't selected
-                } else if (context.globalState.get("NEVER") == false) {
+                } else if (context.globalState.get("NEVER") === false) {
                     let options = vscode.window.showInformationMessage("A new commit was detected. Run a QA check on all changes now?", "Yes", "Always", "No", "Never");
                     await options.then(async (value) => {
                         // Run /all command with the agent if the user chooses
@@ -70,11 +70,11 @@ export function trackCommits(context: vscode.ExtensionContext) {
                                 context.globalState.update("ALWAYS", true);
                                 context.globalState.update("NEVER", false);
                                 checkAll();
-                        } else if (value == "Never") {
+                        } else if (value === "Never") {
                             context.globalState.update("NEVER", true);
                             context.globalState.update("ALWAYS", false);
                         }
-                    })
+                    });
                 }
                 
             }
@@ -83,7 +83,7 @@ export function trackCommits(context: vscode.ExtensionContext) {
         });
     };
 
-    if (git.repositories[0]) setupRepo(git.repositories[0]);
+    if (git.repositories[0]) {setupRepo(git.repositories[0]);}
 
     // Setup a new repo for listening when it is opened
     git.onDidOpenRepository(setupRepo);
