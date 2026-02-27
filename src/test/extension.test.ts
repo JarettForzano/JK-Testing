@@ -16,6 +16,16 @@ suite('Chat Tests', () => {
 	test('responds with a message', async () => {
 		const messages: string[] = [];
 
+		// Stub selectChatModels
+		const originalSelectChatModels = vscode.lm.selectChatModels;
+		(vscode.lm as any).selectChatModels = async () => [
+			{
+				sendRequest: async () => ({
+					text: (async function* () { yield 'Response'; })()
+				})
+			}
+		];
+
 		const mockContext = {
 			history: ["Message a1", "Message 2"] as any
 		};
@@ -42,6 +52,9 @@ suite('Chat Tests', () => {
 			mockStream,
 			mockToken
 		);
+
+		// Restore original
+    	(vscode.lm as any).selectChatModels = originalSelectChatModels;
 
 		assert.ok(messages.length > 0, 'Messages exist inside of the history');
 	});
