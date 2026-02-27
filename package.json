@@ -9,7 +9,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished",
+    "onChatParticipant:jk-test.jk-agent"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "chatParticipants": [
@@ -49,5 +52,8 @@
     "eslint": "^9.39.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0"
-  }
+  },
+  "extensionDependencies": [
+	  "vscode.git"
+  ]
 }
