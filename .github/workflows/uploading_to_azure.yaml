@@ -1,11 +1,11 @@
 
 
-name: Vscode tests
+name: auto-publish
 on: [push, pull_request]
 
 jobs:
   
-  vscode-tests:
+  auto-publish:
     env:
       VSCE_PAT: ${{ secrets.VSCE_PAT }}
     runs-on: macos-latest
