@@ -3,6 +3,7 @@
   "displayName": "jk-test",
   "description": "",
   "version": "0.0.1",
+  "icon": "media/icon.png",
   "engines": {
     "vscode": "^1.109.0"
   },
