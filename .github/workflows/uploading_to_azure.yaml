@@ -28,11 +28,11 @@ jobs:
 
       - name: Major update
         if: github.ref_type == 'tag'
-        run: python -m autoVersioning.py minor
+        run: python -m autoVersioning minor
 
       - name: Minor update
         if: github.ref_type == 'branch'
-        run: python -m autoVersioning.py major
+        run: python -m autoVersioning major
 
       - name: Run tests
         run: npm run deploy
