@@ -32,6 +32,10 @@
           {
             "name": "oversights",
             "description": "Analyze the code for oversights or edge cases."
+          },
+          {
+            "name": "test",
+            "description": "Generate and run pytest tests for user provided code."
           }
         ]
       }

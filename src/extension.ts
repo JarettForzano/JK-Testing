@@ -2,6 +2,7 @@
 import * as vscode from 'vscode';
 import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL } from './prompts';
 import { trackCommits } from './versionControl';
+import { resolveReferences, handleTestOption } from './utility';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -37,22 +38,24 @@ export const base_handler: vscode.ChatRequestHandler = async (
   // initialize the prompt
   let prompt = BASE_PROMPT;
 
-  if (request.command === 'vulnerabilities') {
-	  prompt = VULNERABILITIES_PROMPT; 
+  if (request.command === 'test') {
+    // Exit for the turn once we generate and run the tests
+    await handleTestOption(request, stream, model, token);
+    return;
+  } else if (request.command === 'vulnerabilities') {
+	  prompt = VULNERABILITIES_PROMPT;
   } else if (request.command === "oversights") {
 	  prompt = OVERSIGHTS_PROMPT;
   } else if (request.command === "all") {
     prompt = ALL;
   }
 
-  // TODO add previous message context according to tutorial
-  
   // initialize the messages array with the prompt
   const messages = [vscode.LanguageModelChatMessage.User(prompt)];
-   const previousMessages = context.history.filter(
+  const previousMessages = context.history.filter(
     h => h instanceof vscode.ChatResponseTurn
-  );
-   previousMessages.forEach(m => {
+  ); 
+  previousMessages.forEach(m => {
     let fullMessage = '';
     m.response.forEach(r => {
       const mdPart = r as vscode.ChatResponseMarkdownPart;
@@ -60,6 +63,10 @@ export const base_handler: vscode.ChatRequestHandler = async (
     });
     messages.push(vscode.LanguageModelChatMessage.Assistant(fullMessage));
   });
+
+  // add in any referenced files/code from the chat
+  messages.push(...await resolveReferences(request.references ?? []));
+
   // add in the user's message
   messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
 
@@ -70,7 +77,6 @@ export const base_handler: vscode.ChatRequestHandler = async (
   for await (const fragment of chatResponse.text) {
     stream.markdown(fragment);
   }
-  
 
   return;
 };
