@@ -36,9 +36,73 @@ async function analyzeTestResults(
   }
 }
 
-export async function handleTestOption(request: vscode.ChatRequest, stream: vscode.ChatResponseStream, model: vscode.LanguageModelChat, token: vscode.CancellationToken): Promise<void> {
+async function sendWithTools(
+  messages: vscode.LanguageModelChatMessage[],
+  model: vscode.LanguageModelChat,
+  tools: vscode.LanguageModelChatTool[],
+  token: vscode.CancellationToken,
+  opts: { onToolCall?: () => void; maxRounds?: number; toolInvocationToken?: vscode.ChatParticipantToolToken } = {}
+): Promise<string> {
+  // Max amount of tool calls is 5
+  const maxRounds = opts.maxRounds ?? 5;
+
+  // Sends a request with tools, handling the tool-calling loop until the model returns text
+  for (let round = 0; round < maxRounds; round++) {
+    const response = await model.sendRequest(messages, { tools }, token);
+    const { text, toolCalls } = await collectResponse(response);
+
+    if (toolCalls.length === 0) { return text; }
+
+    opts.onToolCall?.();
+    messages.push(vscode.LanguageModelChatMessage.Assistant(toolCalls));
+    await executeToolCalls(toolCalls, messages, token, opts.toolInvocationToken);
+  }
+
+  return '';
+}
+
+async function collectResponse(
+  response: vscode.LanguageModelChatResponse
+): Promise<{ text: string; toolCalls: vscode.LanguageModelToolCallPart[] }> {
+  let text = '';
+  const toolCalls: vscode.LanguageModelToolCallPart[] = [];
+
+  // Collects text and tool calls from a model response stream
+  for await (const part of response.stream) {
+    if (part instanceof vscode.LanguageModelTextPart) {
+      text += part.value;
+    } else if (part instanceof vscode.LanguageModelToolCallPart) {
+      toolCalls.push(part);
+    }
+  }
+
+  return { text, toolCalls };
+}
+
+async function executeToolCalls(
+  toolCalls: vscode.LanguageModelToolCallPart[],
+  messages: vscode.LanguageModelChatMessage[],
+  token: vscode.CancellationToken,
+  toolInvocationToken: vscode.ChatParticipantToolToken | undefined
+): Promise<void> {
+  // Executes tool calls and appends the results to the message history
+  for (const toolCall of toolCalls) {
+    const result = await vscode.lm.invokeTool(toolCall.name, { input: toolCall.input, toolInvocationToken }, token);
+    messages.push(vscode.LanguageModelChatMessage.User([
+      new vscode.LanguageModelToolResultPart(toolCall.callId, result.content as any)
+    ]));
+  }
+}
+
+export async function handleTestOption(
+  request: vscode.ChatRequest,
+  stream: vscode.ChatResponseStream,
+  model: vscode.LanguageModelChat,
+  token: vscode.CancellationToken,
+  tools: vscode.LanguageModelChatTool[]
+): Promise<void> {
   // Initiate a new message array
-  const messages = [vscode.LanguageModelChatMessage.User(TEST_PROMPT)];
+  const messages: vscode.LanguageModelChatMessage[] = [vscode.LanguageModelChatMessage.User(TEST_PROMPT)];
 
   // Add all of the references the user passed into the context window
   messages.push(...await resolveReferences(request.references ?? []));
@@ -51,24 +115,17 @@ export async function handleTestOption(request: vscode.ChatRequest, stream: vsco
   // Notification to the user that we have started generating the tests
   stream.progress('Generating pytest tests...');
 
-  // Send the messages to the model and start streaming the response
-  const chatResponse = await model.sendRequest(messages, {}, token);
+  // Let the model search/read files if no code was attached, then generate tests
+  const rawCode = await sendWithTools(messages, model, tools, token, {
+    onToolCall: () => stream.progress('Searching codebase...'),
+    toolInvocationToken: request.toolInvocationToken
+  });
 
-  // Stream the generated tests to the user as they arrive
-  let generatedCode = '';
-  let firstChunk = true;
-  for await (const fragment of chatResponse.text) {
-    if (firstChunk) {
-      stream.markdown('**Generated tests:**\n```python\n');
-      firstChunk = false;
-    }
-    generatedCode += fragment;
-    stream.markdown(fragment);
-  }
-  stream.markdown('\n```\n\n');
+  // Stream the generated tests to the user
+  stream.markdown('**Generated tests:**\n```python\n' + rawCode + '\n```\n\n');
 
   // Format the generated code for execution
-  generatedCode = stripCodeFences(generatedCode);
+  const generatedCode = stripCodeFences(rawCode);
 
   // Start setting up the test environment
   stream.progress('Setting up test environment...');

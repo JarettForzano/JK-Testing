@@ -38,7 +38,7 @@ export const base_handler: vscode.ChatRequestHandler = async (
 
   if (request.command === 'test') {
     // Exit for the turn once we generate and run the tests
-    await handleTestOption(request, stream, model, token);
+    await handleTestOption(request, stream, model, token, getTools());
     return;
   } else if (request.command === 'vulnerabilities') {
 	  prompt = VULNERABILITIES_PROMPT;
