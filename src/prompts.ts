@@ -22,12 +22,14 @@ quality.`;
 
 export const ALL = BASE_PROMPT + '\n' + VULNERABILITIES_PROMPT + '\n' + OVERSIGHTS_PROMPT;
 
-export const TEST_PROMPT = `You are a Python test engineer. Given the code provided by the user, generate a complete, runnable pytest test file.
+export const TEST_PROMPT = `You are a Python test engineer. Given the code provided by the user, generate a concise, runnable pytest test file.
 
 Rules:
 - Output ONLY valid Python code. No markdown, no explanations, no code fences.
 - Include all necessary imports (pytest, and anything the code under test needs).
 - Define the functions/classes under test inline if they were provided as snippets, or import them if a file path is clear.
-- Cover happy path, edge cases, and error cases.
+- Generate 3-5 test functions MAX. Each test must cover one specific behavior.
+- Prefer small, isolated unit tests. No integration tests or stress tests.
+- Keep fixtures and setup minimal. One or two assertions per test.
 - Every test function must start with test_.
 - The code must be executable with "pytest <file>" with zero modifications.`;
