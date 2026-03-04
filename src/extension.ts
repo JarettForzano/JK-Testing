@@ -2,8 +2,7 @@
 import * as vscode from 'vscode';
 import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL } from './prompts';
 import { trackCommits } from './versionControl';
-import { handleTestOption } from './utility';
-import { getTools } from './utils';
+import { handleTestOption, getTools } from './utils';
 import * as chatUtils from '@vscode/chat-extension-utils';
 
 // This method is called when your extension is activated
