@@ -2,6 +2,8 @@
 import * as vscode from 'vscode';
 import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL } from './prompts';
 import { trackCommits } from './versionControl';
+import { getTools } from './utils';
+import * as chatUtils from '@vscode/chat-extension-utils';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -44,8 +46,6 @@ export const base_handler: vscode.ChatRequestHandler = async (
   } else if (request.command === "all") {
     prompt = ALL;
   }
-
-  // TODO add previous message context according to tutorial
   
   // initialize the messages array with the prompt
   const messages = [vscode.LanguageModelChatMessage.User(prompt)];
@@ -63,19 +63,24 @@ export const base_handler: vscode.ChatRequestHandler = async (
   // add in the user's message
   messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
 
-  // send the request
-  const chatResponse = await model.sendRequest(messages, {}, token);
+  const tools = getTools();
 
-  // stream the response
-  for await (const fragment of chatResponse.text) {
-    stream.markdown(fragment);
-  }
-  
+  const libResult = chatUtils.sendChatParticipantRequest(
+        request,
+        context,
+        {
+            responseStreamOptions: {
+                stream,
+                references: true,
+                responseText: true
+            },
+            tools: tools,
+            model: model
+        },
+        token);
 
-  return;
+  return await libResult.result;
 };
-
-// create participant
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
