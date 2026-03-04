@@ -2,6 +2,8 @@
 import * as vscode from 'vscode';
 import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL } from './prompts';
 import { trackCommits } from './versionControl';
+import { getTools } from './utils';
+import * as chatUtils from '@vscode/chat-extension-utils';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -45,37 +47,25 @@ export const base_handler: vscode.ChatRequestHandler = async (
     prompt = ALL;
   }
 
-  // TODO add previous message context according to tutorial
-  
-  // initialize the messages array with the prompt
-  const messages = [vscode.LanguageModelChatMessage.User(prompt)];
-   const previousMessages = context.history.filter(
-    h => h instanceof vscode.ChatResponseTurn
-  );
-   previousMessages.forEach(m => {
-    let fullMessage = '';
-    m.response.forEach(r => {
-      const mdPart = r as vscode.ChatResponseMarkdownPart;
-      fullMessage += mdPart.value.value;
-    });
-    messages.push(vscode.LanguageModelChatMessage.Assistant(fullMessage));
-  });
-  // add in the user's message
-  messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
+  const tools = getTools();
 
-  // send the request
-  const chatResponse = await model.sendRequest(messages, {}, token);
+  const libResult = chatUtils.sendChatParticipantRequest(
+        request,
+        context,
+        {
+            prompt: prompt,
+            responseStreamOptions: {
+                stream,
+                references: true,
+                responseText: true
+            },
+            tools: tools,
+            model: model
+        },
+        token);
 
-  // stream the response
-  for await (const fragment of chatResponse.text) {
-    stream.markdown(fragment);
-  }
-  
-
-  return;
+  return await libResult.result;
 };
-
-// create participant
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
