@@ -121,11 +121,15 @@ export async function handleTestOption(
     toolInvocationToken: request.toolInvocationToken
   });
 
-  // Stream the generated tests to the user
-  stream.markdown('**Generated tests:**\n```python\n' + rawCode + '\n```\n\n');
-
-  // Format the generated code for execution
+  // Check if the model actually generated test code or just responded conversationally
   const generatedCode = stripCodeFences(rawCode);
+  if (!generatedCode.includes('def test_')) {
+    stream.markdown(rawCode);
+    return;
+  }
+
+  // Stream the generated tests to the user
+  stream.markdown('**Generated tests:**\n```python\n' + generatedCode + '\n```\n\n');
 
   // Start setting up the test environment
   stream.progress('Setting up test environment...');
