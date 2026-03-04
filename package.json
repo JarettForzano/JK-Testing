@@ -35,13 +35,31 @@
       {
         "command": "jk-test.testWithJK",
         "title": "Test with JK-Testing"
+      },
+      {
+        "command": "jk-test.testWithJKVulnerabilities",
+        "title": "Test with JK-Testing: Vulnerabilities"
+      },
+      {
+        "command": "jk-test.testWithJKOversights",
+        "title": "Test with JK-Testing: Oversights"
       }
     ],
     "menus": {
       "editor/context": [
         {
           "command": "jk-test.testWithJK",
-          "group": "navigation",
+          "group": "jkTesting@1",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "jk-test.testWithJKVulnerabilities",
+          "group": "jkTesting@2",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "jk-test.testWithJKOversights",
+          "group": "jkTesting@3",
           "when": "editorHasSelection"
         }
       ]
