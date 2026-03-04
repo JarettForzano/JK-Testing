@@ -2,7 +2,9 @@
 import * as vscode from 'vscode';
 import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL } from './prompts';
 import { trackCommits } from './versionControl';
-import { resolveReferences, handleTestOption } from './utility';
+import { handleTestOption } from './utility';
+import { getTools } from './utils';
+import * as chatUtils from '@vscode/chat-extension-utils';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -46,38 +48,25 @@ export const base_handler: vscode.ChatRequestHandler = async (
     prompt = ALL;
   }
 
-  // initialize the messages array with the prompt
-  const messages = [vscode.LanguageModelChatMessage.User(prompt)];
-  const previousMessages = context.history.filter(
-    h => h instanceof vscode.ChatResponseTurn
-  ); 
-  previousMessages.forEach(m => {
-    let fullMessage = '';
-    m.response.forEach(r => {
-      const mdPart = r as vscode.ChatResponseMarkdownPart;
-      fullMessage += mdPart.value.value;
-    });
-    messages.push(vscode.LanguageModelChatMessage.Assistant(fullMessage));
-  });
+  const tools = getTools();
 
-  // add in any referenced files/code from the chat
-  messages.push(...await resolveReferences(request.references ?? []));
+  const libResult = chatUtils.sendChatParticipantRequest(
+        request,
+        context,
+        {
+            prompt: prompt,
+            responseStreamOptions: {
+                stream,
+                references: true,
+                responseText: true
+            },
+            tools: tools,
+            model: model
+        },
+        token);
 
-  // add in the user's message
-  messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
-
-  // send the request
-  const chatResponse = await model.sendRequest(messages, {}, token);
-
-  // stream the response
-  for await (const fragment of chatResponse.text) {
-    stream.markdown(fragment);
-  }
-
-  return;
+  return await libResult.result;
 };
-
-// create participant
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
