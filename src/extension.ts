@@ -46,22 +46,6 @@ export const base_handler: vscode.ChatRequestHandler = async (
   } else if (request.command === "all") {
     prompt = ALL;
   }
-  
-  // initialize the messages array with the prompt
-  const messages = [vscode.LanguageModelChatMessage.User(prompt)];
-   const previousMessages = context.history.filter(
-    h => h instanceof vscode.ChatResponseTurn
-  );
-   previousMessages.forEach(m => {
-    let fullMessage = '';
-    m.response.forEach(r => {
-      const mdPart = r as vscode.ChatResponseMarkdownPart;
-      fullMessage += mdPart.value.value;
-    });
-    messages.push(vscode.LanguageModelChatMessage.Assistant(fullMessage));
-  });
-  // add in the user's message
-  messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
 
   const tools = getTools();
 
@@ -69,6 +53,7 @@ export const base_handler: vscode.ChatRequestHandler = async (
         request,
         context,
         {
+            prompt: prompt,
             responseStreamOptions: {
                 stream,
                 references: true,
