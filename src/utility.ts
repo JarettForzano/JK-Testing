@@ -5,6 +5,33 @@ import * as fs from 'fs/promises';
 import { execFile, spawn } from 'child_process';
 import { TEST_PROMPT } from './prompts';
 
+async function analyzeTestResults(
+  generatedCode: string,
+  testOutput: string,
+  stream: vscode.ChatResponseStream,
+  model: vscode.LanguageModelChat,
+  token: vscode.CancellationToken
+): Promise<void> {
+  stream.progress('Analyzing results...');
+  
+  const analyzePrompt =  `You are a QA engineer. Analyze the following pytest results and provide a brief summary:\n` +
+      `- Which tests passed and which failed\n` +
+      `- For failures, explain the likely root cause\n` +
+      `- Suggest fixes for the code under test\n\n` +
+      `**Generated test code:**\n\`\`\`python\n${generatedCode}\n\`\`\`\n\n` +
+      `**Test output:**\n\`\`\`\n${testOutput}\n\`\`\``
+
+  // Prompt the model with the latest test results and get an analysis
+  const messages = [vscode.LanguageModelChatMessage.User(analyzePrompt)];
+  const response = await model.sendRequest(messages, {}, token);
+
+  // Stream the feedback to the user
+  stream.markdown('\n**Analysis:**\n');
+  for await (const fragment of response.text) {
+    stream.markdown(fragment);
+  }
+}
+
 export async function handleTestOption(request: vscode.ChatRequest, stream: vscode.ChatResponseStream, model: vscode.LanguageModelChat, token: vscode.CancellationToken): Promise<void> {
   // Initiate a new message array
   const messages = [vscode.LanguageModelChatMessage.User(TEST_PROMPT)];
@@ -52,6 +79,9 @@ export async function handleTestOption(request: vscode.ChatRequest, stream: vsco
 
       // Return the test results
       stream.markdown(`**Test results** (${passed ? 'PASSED' : 'FAILED'}):\n\`\`\`\n${output}\n\`\`\`\n`);
+
+      // Ask the model to analyze the results
+      await analyzeTestResults(generatedCode, output, stream, model, token);
     } finally {
       // Removes all of the temp code that was generated to run the tests
       await cleanup();
