@@ -21,3 +21,27 @@ functionality unless you determine that updating the functionality is necessary 
 quality.`;
 
 export const ALL = BASE_PROMPT + '\n' + VULNERABILITIES_PROMPT + '\n' + OVERSIGHTS_PROMPT;
+
+export const FIND_REFERENCES = `The user should supply you with the name of a specific unit test. If they did not supply you with a 
+specific unit test to analyze, ask them to be more specific and decline to respond any further. If you were given a 
+specific unit test, determine the following information: 1) which functions from which files are primarily being tested 2) use the search codebase tool to search
+for references to the functions 3) what test suit is being used 4) which fields in any objects are being accessed in the test.
+Your response should be a very consise summary of your findings after everything is complete. Then, let the user know step one was complete, and do not
+ask any follow up questions.`;
+
+export const REFACTOR_TEST = `Determine if this test can be refactored so that it can be parameterized and check 
+various input/output pairs. If so, use the insert edit tool to edit the test in the workspace which would
+allow different data to be tested in the unit test. If it doesn't make sense to refactor the test, politely tell
+the user there is no reason to. If the test already allows for various data to be tested, do not suggest any changes and 
+tell the user that the test is good to go. The test should be runnable. After you use the insert edit tool to make
+the changes, your response should be a very concise summary of your findings after everything is complete. Then, let the 
+user know step two was comlpete and that they should check their notification panel to proceed. Do not ask any follow up questions. `;
+
+export const RUN_TESTS = `Run the unit test using the test runner. If the tests cannot be found, try to figure out why 
+the tests will not run. The first thing you should check is if there is a bug in the unit tests. If there is a bug, make the necessary changes using the insert edit tool. If it seems like there are no bugs in the unit test, 
+tell the user what they should do to fix it. When finished, tell the user that step three is completed that they should check their notification panel to proceed. Do not ask any follow up questions.`;
+
+export const GENERATE_DATA = `Analyze the provided unit test after possibly being modified using the readFile tool. 
+If the test doesn't support inputting different data, politely tell the user this cannot be done. If the test is good to go,
+generate 5 different pieces of test data which test different scenarios/edge cases and add them to the test file using the insert edit tool.
+After the changes have been made, tell the user that the workflow is completed.`;
