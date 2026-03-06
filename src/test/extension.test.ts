@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { base_handler } from '../extension.js';
+import * as utils from '../utils.js';
 
 suite('Default Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
@@ -16,7 +17,7 @@ suite('Chat Tests', () => {
 	test('responds with a message', async () => {
 		const messages: string[] = [];
 
-		// Stub selectChatModels
+		// Stubs
 		const originalSelectChatModels = vscode.lm.selectChatModels;
 		(vscode.lm as any).selectChatModels = async () => [
 			{
@@ -26,8 +27,8 @@ suite('Chat Tests', () => {
 			}
 		];
 
-		const originalTools = vscode.lm.tools;
-		(vscode.lm as any).tools = mockTools;
+		const originalGetTools = utils.getTools;
+		(utils as any).getTools = () => mockTools;
 
 		const mockContext = {
 			history: ["Message a1", "Message 2"] as any
@@ -58,21 +59,21 @@ suite('Chat Tests', () => {
 
 		// Restore original
     	(vscode.lm as any).selectChatModels = originalSelectChatModels;
-		(vscode.lm as any).tools = originalTools;
+		(utils as any).getTools = originalGetTools;
 
 		assert.ok(messages.length > 0, 'Messages exist inside of the history');
 	});
 
 });
 
-const mockTools: readonly vscode.LanguageModelToolInformation[] = [
+const mockTools: readonly vscode.LanguageModelChatTool[] = [
 		// Should be included — name contains "codebase"
-		{ name: 'codebase_search', description: 'Search the codebase', inputSchema: { type: 'object', properties: { query: { type: 'string' } } }, tags: [] },
-		{ name: 'codebaseIndex', description: 'Index the codebase', inputSchema: {}, tags: ['indexing'] },
+		{ name: 'codebase_search', description: 'Search the codebase', inputSchema: { type: 'object', properties: { query: { type: 'string' } } }},
+		{ name: 'codebaseIndex', description: 'Index the codebase', inputSchema: {} },
 		// Should be included — name contains "file"
-		{ name: 'read_file', description: 'Read a file', inputSchema: { type: 'object', properties: { path: { type: 'string' } } }, tags: [] },
-		{ name: 'FileReader', description: 'Opens and reads a file', inputSchema: {}, tags: ['io'] },
+		{ name: 'read_file', description: 'Read a file', inputSchema: { type: 'object', properties: { path: { type: 'string' } } } },
+		{ name: 'FileReader', description: 'Opens and reads a file', inputSchema: {}},
 		// Should be excluded — name does not contain "codebase" or "file"
-		{ name: 'get_weather', description: 'Get current weather', inputSchema: {}, tags: [] },
-		{ name: 'run_terminal', description: 'Run a terminal command', inputSchema: {}, tags: [] },
+		{ name: 'get_weather', description: 'Get current weather', inputSchema: {} },
+		{ name: 'run_terminal', description: 'Run a terminal command', inputSchema: {}},
 	];
