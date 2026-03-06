@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL } from './prompts';
 import { trackCommits } from './versionControl';
-import { getTools } from './utils';
+import { handleTestOption, getTools } from './utils';
 import * as chatUtils from '@vscode/chat-extension-utils';
 
 // This method is called when your extension is activated
@@ -29,18 +29,18 @@ export const base_handler: vscode.ChatRequestHandler = async (
   
 ) => {
 
-  // selects the first model in the models copilot includes since "auto" throws an error. Can add more filters if desired.
-  const models = await vscode.lm.selectChatModels({
-        vendor: 'copilot'
-    });
-
-  const model = models[0];
+  // Use the model the user has selected
+  const model = request.model;
 
   // initialize the prompt
   let prompt = BASE_PROMPT;
 
-  if (request.command === 'vulnerabilities') {
-	  prompt = VULNERABILITIES_PROMPT; 
+  if (request.command === 'test') {
+    // Exit for the turn once we generate and run the tests
+    await handleTestOption(request, stream, model, token, getTools());
+    return;
+  } else if (request.command === 'vulnerabilities') {
+	  prompt = VULNERABILITIES_PROMPT;
   } else if (request.command === "oversights") {
 	  prompt = OVERSIGHTS_PROMPT;
   } else if (request.command === "all") {
