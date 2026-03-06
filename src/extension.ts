@@ -1,6 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 import * as vscode from 'vscode';
-import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL } from './prompts';
+import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL, FIND_REFERENCES, REFACTOR_TEST, GENERATE_DATA, RUN_TESTS } from './prompts';
 import { trackCommits } from './versionControl';
 import { handleTestOption, getTools } from './utils';
 import * as chatUtils from '@vscode/chat-extension-utils';
@@ -29,8 +29,19 @@ export const base_handler: vscode.ChatRequestHandler = async (
   
 ) => {
 
-  // Use the model the user has selected
-  const model = request.model;
+  // Use model the user has selected
+  let model = request.model;
+
+  if (request.model.id === "auto") {
+    // Use gpt-4.1 as a default if auto is still selected
+    const models = await vscode.lm.selectChatModels({
+          vendor: 'copilot',
+          id: 'gpt-4.1'
+      });
+
+    model = models[0];
+  }
+  const tools = getTools();
 
   // initialize the prompt
   let prompt = BASE_PROMPT;
@@ -45,9 +56,37 @@ export const base_handler: vscode.ChatRequestHandler = async (
 	  prompt = OVERSIGHTS_PROMPT;
   } else if (request.command === "all") {
     prompt = ALL;
-  }
+  } else if (request.command === "testdata") {
+    // Initiate the test data workflow
 
-  const tools = getTools();
+    // Gather context about the tests
+    await sendRequest(request, context, stream, token, BASE_PROMPT + " " + FIND_REFERENCES, model, tools);
+
+    // Refactor the tests to parameterize if needed
+    await sendRequest(request, context, stream, token, REFACTOR_TEST, model, tools);
+
+    let confirmRefactor = vscode.window.showInformationMessage("Review the AI code changes.", "Continue", "Cancel");
+    await confirmRefactor.then(async (value) => {
+        if (value === "Cancel") {
+          return;
+        }
+    });
+
+    // Attempt to run the tests and fix any bugs in them
+    await sendRequest(request, context, stream, token, RUN_TESTS, model, tools);
+
+    let confirmFix = vscode.window.showInformationMessage("Review the AI code changes.", "Continue", "Cancel");
+    await confirmFix.then(async (value) => {
+        if (value === "Cancel") {
+          return;
+        }
+    });
+
+    // Generate more test data
+    await sendRequest(request, context, stream, token, GENERATE_DATA, model, tools);
+
+    return;
+  }
 
   const libResult = chatUtils.sendChatParticipantRequest(
         request,
@@ -66,6 +105,34 @@ export const base_handler: vscode.ChatRequestHandler = async (
 
   return await libResult.result;
 };
+
+async function sendRequest (
+  request: vscode.ChatRequest,
+  context: vscode.ChatContext,
+  stream: vscode.ChatResponseStream,
+  token: vscode.CancellationToken,
+  prompt: string,
+  model: vscode.LanguageModelChat,
+  tools: vscode.LanguageModelChatTool[]
+) {
+
+  const result = chatUtils.sendChatParticipantRequest(
+        request,
+        context,
+        {
+            prompt: prompt,
+            responseStreamOptions: {
+                stream,
+                references: true,
+                responseText: true
+            },
+            tools: tools,
+            model: model
+        },
+        token);
+
+  return await result.result;
+}
 
 // This method is called when your extension is deactivated
 export function deactivate() {}

@@ -34,6 +34,10 @@
             "description": "Analyze the code for oversights or edge cases."
           },
           {
+            "name": "testdata",
+            "description": "Parameterize a test and add realistic test data."
+          },
+          {
             "name": "test",
             "description": "Generate and run pytest tests for user provided code."
           }
