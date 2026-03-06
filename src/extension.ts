@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { BASE_PROMPT, VULNERABILITIES_PROMPT, OVERSIGHTS_PROMPT, ALL, FIND_REFERENCES, REFACTOR_TEST, GENERATE_DATA, RUN_TESTS } from './prompts';
 import { trackCommits } from './versionControl';
-import { getTools } from './utils';
+import { handleTestOption, getTools } from './utils';
 import * as chatUtils from '@vscode/chat-extension-utils';
 
 // This method is called when your extension is activated
@@ -29,10 +29,11 @@ export const base_handler: vscode.ChatRequestHandler = async (
   
 ) => {
 
+  // Use model the user has selected
   let model = request.model;
 
   if (request.model.id === "auto") {
-    // selects the first model in the models copilot includes since "auto" throws an error. Can add more filters if desired.
+    // Use gpt-4.1 as a default if auto is still selected
     const models = await vscode.lm.selectChatModels({
           vendor: 'copilot',
           id: 'gpt-4.1'
@@ -45,8 +46,12 @@ export const base_handler: vscode.ChatRequestHandler = async (
   // initialize the prompt
   let prompt = BASE_PROMPT;
 
-  if (request.command === 'vulnerabilities') {
-	  prompt = VULNERABILITIES_PROMPT; 
+  if (request.command === 'test') {
+    // Exit for the turn once we generate and run the tests
+    await handleTestOption(request, stream, model, token, getTools());
+    return;
+  } else if (request.command === 'vulnerabilities') {
+	  prompt = VULNERABILITIES_PROMPT;
   } else if (request.command === "oversights") {
 	  prompt = OVERSIGHTS_PROMPT;
   } else if (request.command === "all") {
