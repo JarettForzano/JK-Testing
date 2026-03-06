@@ -27,7 +27,7 @@ suite('Chat Tests', () => {
 		];
 
 		const originalTools = vscode.lm.tools;
-		(vscode.lm as any).tools = async () => mockTools;
+		(vscode.lm as any).tools = mockTools;
 
 		const mockContext = {
 			history: ["Message a1", "Message 2"] as any
@@ -65,7 +65,7 @@ suite('Chat Tests', () => {
 
 });
 
-const mockTools: vscode.LanguageModelToolInformation[] = [
+const mockTools: readonly vscode.LanguageModelToolInformation[] = [
 		// Should be included — name contains "codebase"
 		{ name: 'codebase_search', description: 'Search the codebase', inputSchema: { type: 'object', properties: { query: { type: 'string' } } }, tags: [] },
 		{ name: 'codebaseIndex', description: 'Index the codebase', inputSchema: {}, tags: ['indexing'] },
