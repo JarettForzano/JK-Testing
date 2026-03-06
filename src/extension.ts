@@ -22,19 +22,16 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		const selection = editor.selection;
-		const selectedText = editor.document.getText(selection);
-
-		if (!selectedText) {
+		if (editor.selection.isEmpty) {
 			vscode.window.showWarningMessage('No text selected. Please select some code first.');
 			return;
 		}
 
 		const commandPrefix = command ? `/${command} ` : '';
 
-		// Open the chat panel and pre-fill it with the agent mention, optional command, and selected code
+		// Open the chat panel with #selection as a context chip rather than inlining the code
 		vscode.commands.executeCommand('workbench.action.chat.open', {
-			query: `@JKAgent ${commandPrefix}\n\`\`\`\n${selectedText}\n\`\`\``,
+			query: `@JKAgent ${commandPrefix}`,
 			isPartialQuery: true
 		});
 	};
@@ -52,25 +49,39 @@ const base_handler: vscode.ChatRequestHandler = async (
   context: vscode.ChatContext,
   stream: vscode.ChatResponseStream,
   token: vscode.CancellationToken
-  
 ) => {
   // initialize the prompt
   let prompt = BASE_PROMPT;
 
   if (request.command === 'vulnerabilities') {
-	prompt = prompt + "\n\n" + VULNERABILITIES_PROMPT; 
+    prompt = prompt + "\n\n" + VULNERABILITIES_PROMPT;
   } else if (request.command === "oversights") {
-	prompt = prompt + "\n\n" + OVERSIGHTS_PROMPT;
+    prompt = prompt + "\n\n" + OVERSIGHTS_PROMPT;
   }
 
-  // TODO add previous message context according to tutorial
-  
   // initialize the messages array with the prompt
   const messages = [vscode.LanguageModelChatMessage.User(prompt)];
-   const previousMessages = context.history.filter(
+
+  // extract content from any context references (e.g. #selection, #file chips)
+  for (const ref of request.references) {
+    if (ref.value instanceof vscode.Location) {
+      const doc = await vscode.workspace.openTextDocument(ref.value.uri);
+      const text = doc.getText(ref.value.range);
+      messages.push(vscode.LanguageModelChatMessage.User(
+        `Context (${ref.id}):\n\`\`\`\n${text}\n\`\`\``
+      ));
+    } else if (typeof ref.value === 'string') {
+      messages.push(vscode.LanguageModelChatMessage.User(
+        `Context (${ref.id}):\n${ref.value}`
+      ));
+    }
+  }
+
+  // add previous assistant messages for conversation history
+  const previousMessages = context.history.filter(
     h => h instanceof vscode.ChatResponseTurn
   );
-   previousMessages.forEach(m => {
+  previousMessages.forEach(m => {
     let fullMessage = '';
     m.response.forEach(r => {
       const mdPart = r as vscode.ChatResponseMarkdownPart;
@@ -78,6 +89,7 @@ const base_handler: vscode.ChatRequestHandler = async (
     });
     messages.push(vscode.LanguageModelChatMessage.Assistant(fullMessage));
   });
+
   // add in the user's message
   messages.push(vscode.LanguageModelChatMessage.User(request.prompt));
 
