@@ -26,6 +26,9 @@ suite('Chat Tests', () => {
 			}
 		];
 
+		const originalTools = vscode.lm.tools;
+		(vscode.lm as any).tools = async () => mockTools;
+
 		const mockContext = {
 			history: ["Message a1", "Message 2"] as any
 		};
@@ -55,8 +58,21 @@ suite('Chat Tests', () => {
 
 		// Restore original
     	(vscode.lm as any).selectChatModels = originalSelectChatModels;
+		(vscode.lm as any).tools = originalTools;
 
 		assert.ok(messages.length > 0, 'Messages exist inside of the history');
 	});
 
 });
+
+const mockTools: vscode.LanguageModelToolInformation[] = [
+		// Should be included — name contains "codebase"
+		{ name: 'codebase_search', description: 'Search the codebase', inputSchema: { type: 'object', properties: { query: { type: 'string' } } }, tags: [] },
+		{ name: 'codebaseIndex', description: 'Index the codebase', inputSchema: {}, tags: ['indexing'] },
+		// Should be included — name contains "file"
+		{ name: 'read_file', description: 'Read a file', inputSchema: { type: 'object', properties: { path: { type: 'string' } } }, tags: [] },
+		{ name: 'FileReader', description: 'Opens and reads a file', inputSchema: {}, tags: ['io'] },
+		// Should be excluded — name does not contain "codebase" or "file"
+		{ name: 'get_weather', description: 'Get current weather', inputSchema: {}, tags: [] },
+		{ name: 'run_terminal', description: 'Run a terminal command', inputSchema: {}, tags: [] },
+	];
