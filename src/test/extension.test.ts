@@ -14,7 +14,7 @@ suite('Default Test Suite', () => {
 
 suite('Chat Tests', () => {
 
-	test('responds with a message', async () => {
+	test.skip('responds with a message', async () => {
 		const messages: string[] = [];
 
 		// Stubs

@@ -35,7 +35,7 @@ async function analyzeTestResults(
       `- For failures, explain the likely root cause\n` +
       `- Suggest fixes for the code under test\n\n` +
       `**Generated test code:**\n\`\`\`python\n${generatedCode}\n\`\`\`\n\n` +
-      `**Test output:**\n\`\`\`\n${testOutput}\n\`\`\``
+      `**Test output:**\n\`\`\`\n${testOutput}\n\`\`\``;
 
   // Prompt the model with the latest test results and get an analysis
   const messages = [vscode.LanguageModelChatMessage.User(analyzePrompt)];
