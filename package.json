@@ -40,6 +40,10 @@
           {
             "name": "test",
             "description": "Generate and run pytest tests for user provided code."
+          },
+          {
+            "name": "all",
+            "description": "Run a full check that combines the vulnerabilities and oversights prompts."
           }
         ]
       }
