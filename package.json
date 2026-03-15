@@ -2,7 +2,7 @@
   "name": "jk-test",
   "displayName": "jk-test",
   "description": "",
-  "version": "0.0.1",
+  "version": "1.2.4",
   "icon": "media/icon.png",
   "publisher": "JKTesting",
   "engines": {
@@ -56,8 +56,7 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "test": "vscode-test",
-    "deploy": "vsce publish "
-
+    "deploy": "vsce publish minor"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -74,8 +73,7 @@
     "typescript-eslint": "^8.54.0",
     "yarn": "^1.22.22"
   },
-  
   "extensionDependencies": [
-	  "vscode.git"
+    "vscode.git"
   ]
 }
