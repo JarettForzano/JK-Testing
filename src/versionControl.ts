@@ -1,6 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 import * as vscode from 'vscode';
-import { GitExtension, Repository } from './git';
+import { Branch, GitExtension, Repository } from './git';
 import * as path from 'path';
 
 /**
@@ -32,11 +32,11 @@ export function trackCommits(context: vscode.ExtensionContext) {
 
             const currentHead = repo.state.HEAD;
 
-            // Helper function to run a full QA check with updates files as context
-            const checkAll = async () => {
-                if (prevHead?.commit && currentHead?.commit) {
+            // Helper function to run a full QA check with updated files as context
+            const checkAll = async (prevCommit: string | undefined, currentCommit: string | undefined) => {
+                if (prevCommit && currentCommit) {
                     let changes = '';
-                    let diff = await repo.diffBetween(prevHead.commit, currentHead.commit);
+                    let diff = await repo.diffBetween(prevCommit, currentCommit);
                     let folderPath = vscode.workspace.workspaceFolders?.[0]?.uri.path;
 
                     // Gather file names and content to add as context for the agent
@@ -46,8 +46,7 @@ export function trackCommits(context: vscode.ExtensionContext) {
                             folderPath = path.dirname(filepath);
                         }
                         filepath = path.relative(folderPath, filepath);
-                        let contents = await repo.show(currentHead.commit, filepath);
-                        changes += "File: " + filepath + "\nContents: " + contents;
+                        changes += "Filename: " + filepath;
                     }
 
                     vscode.commands.executeCommand("workbench.action.chat.open", "@JKAgent /all " + "Perform your tasks on the following fies that were updated:\n" + changes);  
@@ -56,27 +55,29 @@ export function trackCommits(context: vscode.ExtensionContext) {
 
             // New commit was added
             if (currentHead?.commit !== prevHead?.commit && currentHead?.name === prevHead?.name) {
+                const prevHeadCommitCopy = prevHead?.commit;
+                const currentHeadCommitCopy = currentHead?.commit;
+
                 // Run full check if "Always" was already selected
                 if (context.globalState.get("ALWAYS") === true) {
-                    checkAll();
+                    await checkAll(prevHeadCommitCopy, currentHeadCommitCopy);
                     // Show options as long as "Never" wasn't selected
                 } else if (context.globalState.get("NEVER") === false) {
                     let options = vscode.window.showInformationMessage("A new commit was detected. Run a QA check on all changes now?", "Yes", "Always", "No", "Never");
                     await options.then(async (value) => {
                         // Run /all command with the agent if the user chooses
                         if (value === "Yes") {
-                            checkAll();
+                            await checkAll(prevHeadCommitCopy, currentHeadCommitCopy);
                         } else if (value === "Always") {
                                 context.globalState.update("ALWAYS", true);
                                 context.globalState.update("NEVER", false);
-                                checkAll();
+                                await checkAll(prevHeadCommitCopy, currentHeadCommitCopy);
                         } else if (value === "Never") {
                             context.globalState.update("NEVER", true);
                             context.globalState.update("ALWAYS", false);
                         }
                     });
                 }
-                
             }
 
             prevHead = currentHead;
