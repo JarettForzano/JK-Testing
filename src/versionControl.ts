@@ -37,19 +37,14 @@ export function trackCommits(context: vscode.ExtensionContext) {
                 if (prevCommit && currentCommit) {
                     let changes = '';
                     let diff = await repo.diffBetween(prevCommit, currentCommit);
-                    let folderPath = vscode.workspace.workspaceFolders?.[0]?.uri.path;
 
                     // Gather file names and content to add as context for the agent
                     for (let change of diff) {
                         let filepath = change.uri.path;
-                        if (!folderPath) {
-                            folderPath = path.dirname(filepath);
-                        }
-                        filepath = path.relative(folderPath, filepath);
-                        changes += "Filename: " + filepath;
+                        changes += "- " + filepath;
                     }
 
-                    vscode.commands.executeCommand("workbench.action.chat.open", "@JKAgent /all " + "Perform your tasks on the following fies that were updated:\n" + changes);  
+                    vscode.commands.executeCommand("workbench.action.chat.open", "@JKAgent /all Perform your tasks on the following fies:\n" + changes);  
                 }
             };
 

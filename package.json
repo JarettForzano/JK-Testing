@@ -2,7 +2,7 @@
   "name": "jk-test",
   "displayName": "jk-test",
   "description": "",
-  "version": "0.0.1",
+  "version": "1.2.4",
   "icon": "media/icon.png",
   "publisher": "JKTesting",
   "engines": {
@@ -40,6 +40,10 @@
           {
             "name": "test",
             "description": "Generate and run pytest tests for user provided code."
+          },
+          {
+            "name": "all",
+            "description": "Run a full check that combines the vulnerabilities and oversights prompts."
           }
         ]
       }
@@ -94,7 +98,7 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "test": "vscode-test",
-    "deploy": "vsce publish "
+    "deploy": "vsce publish minor --no-git-tag-version"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -111,7 +115,6 @@
     "typescript-eslint": "^8.54.0",
     "yarn": "^1.22.22"
   },
-  
   "extensionDependencies": [
     "vscode.git"
   ]
