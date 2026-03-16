@@ -245,8 +245,13 @@ export async function createTestVenv(): Promise<{ python: string; cleanup: () =>
   }
 
   // Install pytest into the virtual environment
-  const python = path.join(venvDir, 'bin', 'python');
-  const installResult = await execPromise(python, ['-m', 'pip', 'install', 'pytest'], { timeout: 60_000 });
+  let python = path.join(venvDir, 'bin', 'python');
+  let installResult: any = await execPromise(python, ['-m', 'pip', 'install', 'pytest'], { timeout: 60_000 });
+
+  if (installResult.exitCode === 'ENOENT') {
+    python = path.join(venvDir, 'Scripts', 'python');
+    installResult = await execPromise(python, ['-m', 'pip', 'install', 'pytest'], { timeout: 60_000 });
+  }
 
   if (installResult.exitCode !== 0) {
     throw new Error(`Failed to install pytest in venv: ${installResult.stderr}`);
