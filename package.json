@@ -47,7 +47,49 @@
           }
         ]
       }
-    ]
+    ],
+    "commands": [
+      {
+        "command": "jk-test.testWithJK",
+        "title": "Test with JK-Testing"
+      },
+      {
+        "command": "jk-test.testWithJKVulnerabilities",
+        "title": "Test with JK-Testing: Vulnerabilities"
+      },
+      {
+        "command": "jk-test.testWithJKOversights",
+        "title": "Test with JK-Testing: Oversights"
+      },
+      {
+        "command": "jk-test.testWithJKTestData",
+        "title": "Test with JK-Testing: Test Data"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "jk-test.testWithJK",
+          "group": "jkTesting@1",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "jk-test.testWithJKVulnerabilities",
+          "group": "jkTesting@2",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "jk-test.testWithJKOversights",
+          "group": "jkTesting@3",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "jk-test.testWithJKTestData",
+          "group": "jkTesting@4",
+          "when": "editorHasSelection"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
