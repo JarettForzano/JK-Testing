@@ -14,12 +14,41 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "jk-test" is now active!');
 
   trackCommits(context);
-  
+
   const base = vscode.chat.createChatParticipant('jk-test.jk-agent', base_handler);
   base.iconPath = vscode.Uri.file(
     context.asAbsolutePath('media/icon.png')
   );
+
+  // Helper to open chat with selected code, optionally pre-filled with a slash command
+  const openJKChat = (command?: string) => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+
+    if (editor.selection.isEmpty) {
+      vscode.window.showWarningMessage('No text selected. Please select some code first.');
+      return;
+    }
+
+    const commandPrefix = command ? `/${command} ` : '';
+
+    // Open the chat panel with #selection as a context chip rather than inlining the code
+    vscode.commands.executeCommand('workbench.action.chat.open', {
+      query: `@JKAgent ${commandPrefix}`,
+      isPartialQuery: true
+    });
+  };
+
+  const jkTestingCommand = vscode.commands.registerCommand('jk-test.testWithJK', () => openJKChat());
+  const jkVulnerabilitiesCommand = vscode.commands.registerCommand('jk-test.testWithJKVulnerabilities', () => openJKChat('vulnerabilities'));
+  const jkOversightsCommand = vscode.commands.registerCommand('jk-test.testWithJKOversights', () => openJKChat('oversights'));
+  const jkTestDataCommand = vscode.commands.registerCommand('jk-test.testWithJKTestData', () => openJKChat('testdata'));
+
+  context.subscriptions.push(jkTestingCommand, jkVulnerabilitiesCommand, jkOversightsCommand, jkTestDataCommand);
 }
+
 // define a chat handler
 export const base_handler: vscode.ChatRequestHandler = async (
   request: vscode.ChatRequest,
